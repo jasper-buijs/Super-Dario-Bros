@@ -3,7 +3,6 @@
 
 # IMPORT
 import pygame
-import os
 from pygame.locals import *
 from time import sleep
 from random import randint
@@ -13,137 +12,141 @@ pygame.font.init()
 
 # DECLARATIONS
 # PyGame
-global nob, balllist
+bg_color = []
 # Python
-balllist = []
-nob = 50
-fontsize = 100
-font1 = pygame.font.SysFont("Bauhaus 93", fontsize)
+ball_list = []
+possible_directions = ("+", "-")
+number_of_balls = 50
+main_font = pygame.font.SysFont("Bauhaus 93", 100)
 
 
 # CLASSES
 # Ball
 class Ball:
-    def __init__(self, screen, x, y, fillcolor, radius, speed, xdir, ydir):
-        self.posx = x
-        self.posy = y
+    def __init__(self, screen, x, y, ball_color, radius, speed, x_direction, y_direction):
+        self.x_pos = x
+        self.y_pos = y
         self.pos = [x, y]
-        self.col = fillcolor
+        self.col = ball_color
         self.rad = radius
-        self.wind = screen
-        self.speed = speed
-        self.dirx = xdir
-        self.diry = ydir
+        self.win = screen
+        self.v = speed
+        self.x_dir = x_direction
+        self.y_dir = y_direction
         self.draw()
 
-    def move(self, fillcolor):
-        self.col = fillcolor
-        if self.dirx == "+":
-            self.posx += self.speed
-        elif self.dirx == "-":
-            self.posx -= self.speed
-        elif self.dirx != "0":
-            print("Error with moving x-co. x-co = {}".format(self.dirx))
-        if self.diry == "+":
-            self.posy += self.speed
-        elif self.diry == "-":
-            self.posy -= self.speed
-        elif self.diry != "0":
-            print("Error with moving y-co. y-co = {}".format(self.diry))
-        while self.posx < self.rad:
-            self.posx += 1
-            self.dirx = "+"
-        while self.posy < self.rad:
-            self.posy += 1
-            self.diry = "+"
-        while self.posy > (500 - self.rad):
-            self.posy -= 1
-            self.diry = "-"
-        while self.posx > (1000 - self.rad):
-            self.posx -= 1
-            self.diry = "+"
-        self.pos = [self.posx, self.posy]
+    def move(self, ball_color):
+        self.col = ball_color
+        if self.x_dir == "+":
+            self.x_pos += self.v
+        elif self.x_dir == "-":
+            self.x_pos -= self.v
+        elif self.x_dir != "0":
+            print("Error with moving x-co. x-co = {}".format(self.x_dir))
+        if self.y_dir == "+":
+            self.y_pos += self.v
+        elif self.y_dir == "-":
+            self.y_pos -= self.v
+        elif self.y_dir != "0":
+            print("Error with moving y-co. y-co = {}".format(self.y_dir))
+        while self.x_pos < self.rad:
+            self.x_pos += 1
+            self.x_dir = "+"
+        while self.y_pos < self.rad:
+            self.y_pos += 1
+            self.y_dir = "+"
+        while self.y_pos > (500 - self.rad):
+            self.y_pos -= 1
+            self.y_dir = "-"
+        while self.x_pos > (1000 - self.rad):
+            self.x_pos -= 1
+            self.y_dir = "+"
+        self.pos = [self.x_pos, self.y_pos]
         self.draw()
 
     def draw(self):
-        pygame.draw.circle(self.wind, self.col, self.pos, self.rad)
-        if len(balllist) != nob:
-            pygame.draw.circle(self.wind, self.col, [int(1000 - self.rad), int(500 - self.rad)], self.rad)
+        pygame.draw.circle(self.win, self.col, self.pos, self.rad)
+        if len(ball_list) != number_of_balls:
+            pygame.draw.circle(self.win, self.col, [int(1000 - self.rad), int(500 - self.rad)], self.rad)
 
 
 # MAIN
 # Loading screen
 def loading_screen(screen, size, icon, mode):
-    signs = ("+", "-")
-    for i in range(nob):
+    global number_of_balls, ball_list, bg_color, possible_directions
+    for i in range(number_of_balls):
         ball = Ball(screen, randint(0, 1000), randint(0, 500), [255, 255, 255],
-                    20, 5, signs[randint(0, 1)], signs[randint(0, 1)])
-        balllist.append(ball)
+                    20, 5, possible_directions[randint(0, 1)], possible_directions[randint(0, 1)])
+        ball_list.append(ball)
         sleep(0.005)
     screen.fill([255, 255, 255])
     clock = pygame.time.Clock()
     pygame.display.flip()
-    while balllist:
+    while ball_list:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
-                os._exit(0)
-        colorbg = [randint(0, 255), randint(0, 255), randint(0, 255)]
+                exit()
+        bg_color = [randint(0, 255), randint(0, 255), randint(0, 255)]
         colorball = []
         for i in range(3):
-            colorball.append(255 - colorbg[i])
-        screen.fill(colorbg)
-        for baall in balllist:
+            colorball.append(255 - bg_color[i])
+        screen.fill(bg_color)
+        for ball in ball_list:
             if mode == "hard":
-                baall.move(colorball)
+                ball.move(colorball)
             else:
-                baall.move([255, 255, 255])
-            if baall.pos == [int(1000 - baall.rad), int(500 - baall.rad)]:
-                balllist.remove(baall)
+                ball.move([255, 255, 255])
+            if ball.pos == [int(1000 - ball.rad), int(500 - ball.rad)]:
+                ball_list.remove(ball)
         clock.tick(60)
         pygame.display.flip()
-    pygame.draw.polygon(screen, colorbg, [(int(1000 - (0.5 * baall.rad)), int(500 - baall.rad)),
-                                          (int(1000 - (1.5 * baall.rad)), int(500 - (0.5 * baall.rad))),
-                                          (int(1000 - (1.5 * baall.rad)), int(500 - (1.5 * baall.rad)))])
-    tekst = font1.render("Super Dario Bros", True, baall.col)
-    iconrender = screen.blit(icon, (int(size[0] / 2) - int(icon.get_rect().width / 2), (int(size[1] / 3) - int(icon.get_rect().height / 2))))
-    screen.blit(tekst, ((int(size[0] / 2) - int(tekst.get_rect().width / 2), (int(size[1] / 2) - int(tekst.get_rect().height / 2)))))
+    pygame.draw.polygon(screen, bg_color, [(int(1000 - (0.5 * ball.rad)), int(500 - ball.rad)),
+                                           (int(1000 - (1.5 * ball.rad)), int(500 - (0.5 * ball.rad))),
+                                           (int(1000 - (1.5 * ball.rad)), int(500 - (1.5 * ball.rad)))])
+    text = main_font.render("Super Dario Bros", True, ball.col)
+    screen.blit(icon, (int(size[0] / 2) - int(icon.get_rect().width / 2),
+                       (int(size[1] / 3) - int(icon.get_rect().height / 2))))
+    screen.blit(text, ((int(size[0] / 2) - int(text.get_rect().width / 2),
+                        (int(size[1] / 2) - int(text.get_rect().height / 2)))))
     pygame.display.flip()
-    button_to_presss = True
-    while button_to_presss:
+    while True:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
-                os._exit(0)
+                exit()
             if event.type == MOUSEBUTTONDOWN:
                 position = pygame.mouse.get_pos()
-                if (((position[0] < int(1000 - (0.5 * baall.rad))) and (
-                        position[0] > int(1000 - (1.5 * baall.rad)))) and (
-                        (position[1] > int(500 - (1.5 * baall.rad))) and (position[1] < int(500 - (0.5 * baall.rad))))):
-                    button_to_presss = False
-    button_to_presss = "none"
-    while button_to_presss == "none":
+                if (((position[0] < int(1000 - (0.5 * ball.rad))) and (
+                        position[0] > int(1000 - (1.5 * ball.rad)))) and (
+                        (position[1] > int(500 - (1.5 * ball.rad))) and (position[1] < int(500 - (0.5 * ball.rad))))):
+                    break
+        else:
+            continue
+        break
+    while True:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
-                os._exit(0)
+                exit()
             if event.type == MOUSEBUTTONDOWN:
                 position = pygame.mouse.get_pos()
                 if (position[0] < int((size[0] / 2) + 200) and (position[0] > int((size[0] / 2) - 200))) and (
                         (position[1] > int((size[1] / 2) - 60)) and (position[1] < int((size[1] / 2) - 10))):
-                    button_to_presss = "normal"
+                    return "normal"
                 elif (position[0] < int((size[0] / 2) + 200) and (position[0] > int((size[0] / 2) - 200))) and (
                         (position[1] > int((size[1] / 2) + 10)) and (position[1] < int((size[1] / 2) + 60))):
-                    button_to_presss = "hard"
-                return button_to_presss
-        screen.fill(colorbg)
-        fillcolor = [randint(0, 255), randint(0, 255), randint(0, 255)]
-        negcolor = []
-        for rgbvalue in fillcolor:
-            negcolor.append(255 - rgbvalue)
-        screen.fill(fillcolor)
-        pygame.draw.rect(screen, baall.col, [(int((size[0] / 2) - 200), int((size[1] / 2) - 60)),
-                                             (int(400), int(50))])
-        pygame.draw.rect(screen, negcolor, [(int((size[0] / 2) - 200), int((size[1] / 2) + 10)),
+                    return "hard"
+        screen.fill(bg_color)
+        screen_color = [randint(0, 255), randint(0, 255), randint(0, 255)]
+        ball_color = []
+        for rgb_value in screen_color:
+            ball_color.append(255 - rgb_value)
+        screen.fill(screen_color)
+        pygame.draw.rect(screen, ball.col, [(int((size[0] / 2) - 200),
+                                             int((size[1] / 2) - 60)),
                                             (int(400), int(50))])
+        pygame.draw.rect(screen, ball_color, [(int((size[0] / 2) - 200),
+                                               int((size[1] / 2) + 10)),
+                                              (int(400), int(50))])
         pygame.display.flip()
